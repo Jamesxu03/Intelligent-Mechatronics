@@ -22,19 +22,26 @@ class Gesture(Enum):
 class VisualGestureRecognizer:
     """Uses Google MediaPipe Vision API for robust low-latency gesture detection."""
     def __init__(self, confidence_threshold=0.75):
-        self.mp_hands = mp.solutions.hands
-        # We enforce strict confidence checks to increase reliability of the visual input stage
-        self.hands = self.mp_hands.Hands(
-            static_image_mode=False,
-            max_num_hands=1,
-            min_detection_confidence=confidence_threshold,
-            min_tracking_confidence=confidence_threshold
-        )
-        self.draw = mp.solutions.drawing_utils
+        try:
+            import mediapipe as mp
+            self.mp_hands = mp.solutions.hands
+            self.hands = self.mp_hands.Hands(
+                static_image_mode=False,
+                max_num_hands=1,
+                min_detection_confidence=confidence_threshold,
+                min_tracking_confidence=confidence_threshold
+            )
+            self.draw = mp.solutions.drawing_utils
+        except Exception as e:
+            logging.error(f"MediaPipe Vision API unavailable on this architecture: {e}")
+            self.hands = None
         self.tip_ids = [4, 8, 12, 16, 20] # Thumb, Index, Middle, Ring, Pinky
         
     def extract_gesture(self, frame) -> Gesture:
         """Processes RGB video frame and evaluates 3D hand landmarks."""
+        if self.hands is None:
+            return Gesture.UNKNOWN
+            
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         result = self.hands.process(rgb_frame)
         
@@ -103,8 +110,15 @@ class SystemIntegrator:
         self.telemetry_thread.start()
         
     def run_fusion_pipeline(self):
-        cap = cv2.VideoCapture(0)
-        logging.info("Starting Dual-Redundant Fusion Pipeline...")
+        try:
+            cap = cv2.VideoCapture(0)
+            if not cap.isOpened():
+                logging.error("CRITICAL EXCEPTION: Main RGB Camera Feed Offline. Halting.")
+                return
+            logging.info("Starting Dual-Redundant Fusion Pipeline...")
+        except Exception as e:
+            logging.error(f"FATAL BOOT EXCEPTION: {e}")
+            return
         
         while cap.isOpened():
             success, frame = cap.read()

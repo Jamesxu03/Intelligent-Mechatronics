@@ -22,7 +22,7 @@ class AutonomousTrajectoryTracker:
         
         self.integral_error += center_offset_px
         # Clamp integral windup
-        self.integral_error = max(-100, min(100, self.integral_error))
+        self.integral_error = max(-100.0, min(100.0, self.integral_error))
         
         # Calculate the PWM bias for left and right wheels
         steering_bias = self.steering_pid.update(

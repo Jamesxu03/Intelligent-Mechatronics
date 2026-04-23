@@ -12,11 +12,23 @@ class AutonomousPerceptionModule:
     """
     
     def __init__(self, camera_index=0):
-        self.cap = cv2.VideoCapture(camera_index)
-        self.frame_width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.frame_height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        
-        logging.info(f"Initialized autonomous perception with resolution {self.frame_width}x{self.frame_height}")
+        try:
+            self.cap = cv2.VideoCapture(camera_index)
+            if not self.cap.isOpened() and camera_index != "dummy":
+                logging.error(f"CRITICAL: Hardware fault. Failed to initialize camera index {camera_index}")
+                raise ConnectionError("Camera offline.")
+            
+            # Use default parameters if dummy
+            if camera_index == "dummy":
+                self.frame_width = 640
+                self.frame_height = 480
+            else:
+                self.frame_width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                self.frame_height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                
+            logging.info(f"Initialized autonomous perception with resolution {self.frame_width}x{self.frame_height}")
+        except Exception as e:
+            logging.error(f"FATAL EXCEPTION in AutonomousPerceptionModule: {e}")
 
     def detect_lane_offset(self, frame):
         """
