@@ -5,8 +5,8 @@ import numpy as np
 # Adjust the path to import src modules
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../src')))
 
-from Hand.hand_controller import VisualGestureRecognizer, Gesture
-from Car.host_pc_vision.perception import AutonomousPerceptionModule
+from robotic_manipulator.hand_controller import VisualGestureRecognizer, Gesture
+from autonomous_platform.host_pc_vision.perception import AutonomousPerceptionModule
 
 def test_visual_gesture_empty_frame():
     """TDD Edge Case: Ensure the gesture recognizer doesn't crash on an empty frame."""

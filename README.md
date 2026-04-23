@@ -14,11 +14,11 @@ Welcome to the V2.0 architecture upgrade of the Humanoid Robot and Autonomous Se
    ```
 2. To deploy the hand CV integration, launch: 
    ```bash
-   python src/Hand/hand_controller.py
+   python src/robotic_manipulator/hand_controller.py
    ```
-3. To test the visual trajectory pipeline for the car, execute:
+3. To test the visual trajectory pipeline for the platform, execute:
    ```bash
-   python src/Car/perception.py
+   python src/autonomous_platform/host_pc_vision/perception.py
    ```
 
 ## Running the Automated Test Suite
