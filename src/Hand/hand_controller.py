@@ -103,9 +103,9 @@ class PhysicalSensorInterface:
 
 class SystemIntegrator:
     """Core synchronization protocol to enforce redundancy."""
-    def __init__(self):
+    def __init__(self, port: str = '/dev/cu.usbserial-0001'):
         self.vision = VisualGestureRecognizer()
-        self.hardware = PhysicalSensorInterface(port='/dev/cu.usbserial-0001') # Standard MAC layout
+        self.hardware = PhysicalSensorInterface(port=port)
         self.telemetry_thread = threading.Thread(target=self.hardware.read_telemetry_loop, daemon=True)
         self.telemetry_thread.start()
         
@@ -152,5 +152,10 @@ class SystemIntegrator:
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    system = SystemIntegrator()
+    import argparse
+    parser = argparse.ArgumentParser(description="Run the Human-Robot Gesture System")
+    parser.add_argument('--port', type=str, default='/dev/cu.usbserial-0001', help='Serial port for Arduino')
+    args = parser.parse_args()
+
+    system = SystemIntegrator(port=args.port)
     system.run_fusion_pipeline()

@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import logging
+from typing import List, Tuple
 
 logging.basicConfig(level=logging.INFO)
 
@@ -30,7 +31,7 @@ class AutonomousPerceptionModule:
         except Exception as e:
             logging.error(f"FATAL EXCEPTION in AutonomousPerceptionModule: {e}")
 
-    def detect_lane_offset(self, frame):
+    def detect_lane_offset(self, frame: np.ndarray) -> int:
         """
         Calculates the central trajectory offset necessary for PID tracking.
         """
@@ -79,7 +80,7 @@ class AutonomousPerceptionModule:
         offset_error = computed_lane_center - center_x
         return offset_error
 
-    def identify_obstacles(self, frame):
+    def identify_obstacles(self, frame: np.ndarray) -> List[Tuple[int, int, int, int]]:
         """
         Obstacle avoidance routine utilizing color thresholding and bounding box extraction.
         """
