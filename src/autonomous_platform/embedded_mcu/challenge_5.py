@@ -158,13 +158,9 @@ def run_challenge_5():
             rho = accel_to_pitch_rad(ax, ay, az)
             theta = alpha * (theta + pitch_rate * dt_sec) + (1.0 - alpha) * rho
             
-            # Integral with anti-windup
-            e = theta - setpoint
-            integral_err += e * dt_sec
-            integral_err = max(-integral_max, min(integral_max, integral_err))
-            
+            # Integral with anti-windup handled strictly inside PID logic class
             # PID output: PWM in [-100, 100]
-            pwm = pid.update(theta, pitch_rate, setpoint, integral_err)
+            pwm = pid.update(theta, pitch_rate, setpoint, dt_sec=dt_sec)
             
             # Drive both motors (differential drive uses same value for forward/back)
             motor.drive(pwm, pwm)

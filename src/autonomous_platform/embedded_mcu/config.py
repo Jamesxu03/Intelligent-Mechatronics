@@ -10,7 +10,7 @@ Hardware assignments per Appendix A pinout.
 # WARNING: SW0 and OLED RES both use Y8. If SW0 shorts Y8 to GND, OLED will
 # stay in reset (black screen). For DIP=010, ensure SW0 doesn't disable display.
 # =============================================================================
-DIP_PINS = ['X6', 'Y3', 'Y8']   # SW2, SW1, SW0
+DIP_PINS = ['X6', 'Y3', 'X8']   # Fixed conflict with OLED RES (was Y8)
 
 # =============================================================================
 # USER Button

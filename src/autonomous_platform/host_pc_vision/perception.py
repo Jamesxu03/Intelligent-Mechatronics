@@ -14,22 +14,23 @@ class AutonomousPerceptionModule:
     
     def __init__(self, camera_index=0):
         try:
-            self.cap = cv2.VideoCapture(camera_index)
-            if not self.cap.isOpened() and camera_index != "dummy":
-                logging.error(f"CRITICAL: Hardware fault. Failed to initialize camera index {camera_index}")
-                raise ConnectionError("Camera offline.")
-            
-            # Use default parameters if dummy
-            if camera_index == "dummy":
+            if camera_index is None or not isinstance(camera_index, int):
                 self.frame_width = 640
                 self.frame_height = 480
+                self.cap = None
+                logging.info("Initialized autonomous perception locally in CI/CD simulation mode.")
             else:
+                self.cap = cv2.VideoCapture(camera_index)
+                if not self.cap.isOpened():
+                    logging.error(f"CRITICAL: Hardware fault. Failed to initialize camera index {camera_index}")
+                    raise ConnectionError("Camera offline.")
                 self.frame_width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
                 self.frame_height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                 
-            logging.info(f"Initialized autonomous perception with resolution {self.frame_width}x{self.frame_height}")
+                logging.info(f"Initialized autonomous perception with resolution {self.frame_width}x{self.frame_height}")
         except Exception as e:
             logging.error(f"FATAL EXCEPTION in AutonomousPerceptionModule: {e}")
+            raise
 
     def detect_lane_offset(self, frame: np.ndarray) -> int:
         """
@@ -87,10 +88,9 @@ class AutonomousPerceptionModule:
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
         
         # Define arbitrary threshold for obstacles (e.g. standard red traffic cones)
-        lower_red = np.array([0, 120, 70])
-        upper_red = np.array([10, 255, 255])
-        
-        mask = cv2.inRange(hsv, lower_red, upper_red)
+        mask1 = cv2.inRange(hsv, np.array([0, 120, 70]), np.array([10, 255, 255]))
+        mask2 = cv2.inRange(hsv, np.array([170, 120, 70]), np.array([180, 255, 255]))
+        mask = cv2.bitwise_or(mask1, mask2)
         contours, _ = cv2.findContours(mask, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         
         obstacles = []
@@ -104,6 +104,10 @@ class AutonomousPerceptionModule:
 
     def process_pipeline(self):
         """Host-to-vehicle bridge simulation."""
+        if self.cap is None:
+            logging.info("Running in simulation mode. No frame to process.")
+            return
+
         logging.info("Beginning Host PC -> Vehicle Telemetry stream...")
         while True:
             ret, frame = self.cap.read()
@@ -123,7 +127,8 @@ class AutonomousPerceptionModule:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
                 
-        self.cap.release()
+        if self.cap is not None:
+            self.cap.release()
         cv2.destroyAllWindows()
 
 if __name__ == "__main__":

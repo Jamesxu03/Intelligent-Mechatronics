@@ -23,7 +23,6 @@ class VisualGestureRecognizer:
     """Uses Google MediaPipe Vision API for robust low-latency gesture detection."""
     def __init__(self, confidence_threshold=0.75):
         try:
-            import mediapipe as mp
             self.mp_hands = mp.solutions.hands
             self.hands = self.mp_hands.Hands(
                 static_image_mode=False,
@@ -45,15 +44,16 @@ class VisualGestureRecognizer:
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         result = self.hands.process(rgb_frame)
         
-        if result.multi_hand_landmarks:
-            for hand_landmarks in result.multi_hand_landmarks:
+        if result.multi_hand_landmarks and result.multi_handedness:
+            for hand_landmarks, handedness in zip(result.multi_hand_landmarks, result.multi_handedness):
                 fingers = []
                 
-                # Check Thumb (pseudo-heuristics based on relative X/Y depending on handedness)
-                if hand_landmarks.landmark[self.tip_ids[0]].x < hand_landmarks.landmark[self.tip_ids[0] - 1].x:
-                    fingers.append(1)
+                # Check Thumb accounting for handedness
+                is_right = (handedness.classification[0].label == 'Right')
+                if is_right:
+                    fingers.append(1 if hand_landmarks.landmark[self.tip_ids[0]].x < hand_landmarks.landmark[self.tip_ids[0] - 1].x else 0)
                 else:
-                    fingers.append(0)
+                    fingers.append(1 if hand_landmarks.landmark[self.tip_ids[0]].x > hand_landmarks.landmark[self.tip_ids[0] - 1].x else 0)
                     
                 # Check 4 Fingers
                 for id in range(1, 5):
@@ -86,9 +86,10 @@ class PhysicalSensorInterface:
             
         self.latest_physical_move = Gesture.UNKNOWN
         self.lock = threading.Lock()
+        self._running = True
         
     def read_telemetry_loop(self):
-        while True:
+        while self._running:
             if self.connected and self.ser.in_waiting > 0:
                 line = self.ser.readline().decode('utf-8', errors='ignore').strip()
                 if "PHYSICAL_MOVE:" in line:
@@ -100,6 +101,9 @@ class PhysicalSensorInterface:
     def get_latest_move(self):
         with self.lock:
             return self.latest_physical_move
+            
+    def stop(self):
+        self._running = False
 
 class SystemIntegrator:
     """Core synchronization protocol to enforce redundancy."""
@@ -148,6 +152,8 @@ class SystemIntegrator:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
                 
+        self.hardware.stop()
+        self.telemetry_thread.join()
         cap.release()
         cv2.destroyAllWindows()
 

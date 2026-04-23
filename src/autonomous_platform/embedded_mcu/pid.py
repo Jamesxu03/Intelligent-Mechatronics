@@ -33,8 +33,9 @@ class PIDController:
         self.ki = ki
         self.kd = kd
         self._pwm_limit = 100  # Strict limit: output clamped to ±100
+        self._integral = 0.0
     
-    def update(self, pitch, pitch_rate, setpoint, integral_err):
+    def update(self, pitch, pitch_rate, setpoint, dt_sec=0.005):
         """
         Compute PID output.
         
@@ -57,7 +58,10 @@ class PIDController:
         # PID equation: w(t) = Kp*e(t) + Kd*ė(t) + Ki*∫e(τ)dτ
         p_term = self.kp * e
         d_term = self.kd * e_dot
-        i_term = self.ki * integral_err
+        self._integral += e * dt_sec
+        integral_max = 10.0
+        self._integral = max(-integral_max, min(integral_max, self._integral))
+        i_term = self.ki * self._integral
         
         pwm = p_term + d_term + i_term
         
