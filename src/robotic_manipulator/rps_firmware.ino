@@ -1,3 +1,50 @@
+/*
+ * rps_firmware.ino - Rock-Paper-Scissors Robotic Hand Firmware
+ *
+ * Hardware: Custom PCB with 5x servo fingers, arm servo, 2x flex sensors,
+ *           3x countdown LEDs, 3x result LEDs (Win/Lose/Tie), button.
+ * Communication: Serial @ 115200 baud, transmits PHYSICAL_MOVE:<code> to host PC.
+ */
+
+#include <Arduino.h>
+
+// ---------- Pin Assignments ----------
+const int servoFinger0 = 3;   // Index finger servo
+const int servoFinger1 = 5;   // Middle finger servo
+const int servoFinger2 = 6;   // Ring finger servo
+const int servoFinger3 = 9;   // Little finger servo
+const int servoFinger4 = 10;  // Thumb servo
+const int servoArm     = 11;  // Arm rotation servo
+
+const int flexA = A0;         // Flex sensor A (index/middle)
+const int flexB = A1;         // Flex sensor B (ring/little)
+const int buttonPin = 2;      // Start button (INPUT_PULLUP)
+
+const int ledCount1 = 4;      // Countdown LED 1
+const int ledCount2 = 7;      // Countdown LED 2
+const int ledCount3 = 8;      // Countdown LED 3
+const int ledWin    = A2;     // Result LED: human wins
+const int ledLose   = A3;     // Result LED: robot wins
+const int ledTie    = A4;     // Result LED: draw
+
+// ---------- Servo Constants ----------
+const int FINGER_OPEN  = 180;
+const int FINGER_CLOSE = 0;
+const int ARM_CENTER   = 90;
+const int ARM_LEFT90   = 0;
+const int ARM_RIGHT90  = 180;
+
+// ---------- Timing Constants (ms) ----------
+const int t_count_step        = 400;
+const int t_arm_step           = 600;
+const int t_wait_before_start  = 500;
+const int t_after_gesture      = 1000;
+const int t_result_show        = 3000;
+
+// ---------- PWM Helper ----------
+const float minDuty = 2.5;   // 0 degrees
+const float maxDuty = 12.5;  // 180 degrees
+
 // Write an angle (0..180) to a servo pin using map/pwmWrite
 void writeServoAngle(int pin, int angle) {
   if (angle < 0) angle = 0;

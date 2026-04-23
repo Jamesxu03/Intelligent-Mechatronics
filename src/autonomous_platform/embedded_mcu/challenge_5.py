@@ -130,8 +130,6 @@ def run_challenge_5():
     alpha = COMPLEMENTARY_ALPHA
     dt_sec = LOOP_PERIOD_US / 1_000_000.0  # 5ms = 0.005 seconds
     setpoint = 0.0  # Target pitch (radians) = upright
-    integral_err = 0.0
-    integral_max = 10.0  # Anti-windup
     theta = 0.0  # Pitch estimate (radians)
     
     # Initial accel read for theta

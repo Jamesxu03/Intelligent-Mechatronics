@@ -14,7 +14,7 @@ class PIDController:
         pitch        : Current pitch angle (radians, positive = tilt forward)
         pitch_rate   : Rate of change of pitch (rad/s, from gyro)
         setpoint     : Target pitch angle (radians, typically 0 for upright)
-        integral_err : Cumulative integral of error (caller maintains for anti-windup)
+        dt_sec       : Time step for integral accumulation (internally maintained)
     
     Output:
         PWM drive value in range [-100, +100]
@@ -43,7 +43,7 @@ class PIDController:
             pitch        : Current pitch angle (radians)
             pitch_rate   : Rate of change of pitch (rad/s)
             setpoint     : Target pitch (radians)
-            integral_err : Cumulative error integral (rad*s)
+            dt_sec       : Time step in seconds (default 0.005 = 200Hz)
         
         Returns:
             pwm: PWM drive value in [-100, 100]

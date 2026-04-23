@@ -56,8 +56,8 @@ class VisualGestureRecognizer:
                     fingers.append(1 if hand_landmarks.landmark[self.tip_ids[0]].x > hand_landmarks.landmark[self.tip_ids[0] - 1].x else 0)
                     
                 # Check 4 Fingers
-                for id in range(1, 5):
-                    if hand_landmarks.landmark[self.tip_ids[id]].y < hand_landmarks.landmark[self.tip_ids[id] - 2].y:
+                for finger_idx in range(1, 5):
+                    if hand_landmarks.landmark[self.tip_ids[finger_idx]].y < hand_landmarks.landmark[self.tip_ids[finger_idx] - 2].y:
                         fingers.append(1)
                     else:
                         fingers.append(0)

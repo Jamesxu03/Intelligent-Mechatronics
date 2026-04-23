@@ -6,6 +6,8 @@ Menu system driven by 3-bit DIP switch:
   - '100' (binary 4) -> trajectory_tracking: Autonomous CV PID Routine
 """
 
+import sys
+import os
 import pyb
 from config import DIP_PINS
 
@@ -32,6 +34,8 @@ def main():
         from challenge_5 import run_challenge_5
         run_challenge_5()
     elif dip == '100':
+        # trajectory_tracking lives in host_pc_vision/ after the V2.1 restructure
+        sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'host_pc_vision'))
         from trajectory_tracking import run_autonomous_mode
         run_autonomous_mode()
     else:

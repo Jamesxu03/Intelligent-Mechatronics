@@ -7,8 +7,7 @@ Hardware assignments per Appendix A pinout.
 # =============================================================================
 # DIP Switch Configuration (3-bit)
 # SW2=MSB, SW1, SW0=LSB -> '010' = challenge_5
-# WARNING: SW0 and OLED RES both use Y8. If SW0 shorts Y8 to GND, OLED will
-# stay in reset (black screen). For DIP=010, ensure SW0 doesn't disable display.
+# NOTE: SW0 was remapped from Y8 to X8 to avoid conflict with OLED RES pin.
 # =============================================================================
 DIP_PINS = ['X6', 'Y3', 'X8']   # Fixed conflict with OLED RES (was Y8)
 

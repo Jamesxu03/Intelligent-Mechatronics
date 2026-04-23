@@ -1,8 +1,12 @@
 """
 trajectory_tracking.py - Bridges visual perception offsets to PID loops.
-Runs directly on the Segway's MicroPython controller receiving Bluetooth metrics.
+Receives lane-offset telemetry from the host PC vision pipeline and converts
+it into steering PWM corrections via a dedicated PID controller.
 """
 
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'embedded_mcu'))
 from pid import PIDController
 
 class AutonomousTrajectoryTracker:
