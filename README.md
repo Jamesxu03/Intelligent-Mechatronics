@@ -84,6 +84,8 @@ tests/
 
 ## Quick Start
 
+> **⚠️ Hardware Notice:** The vision modules require a webcam. The robotic hand module communicates with an Arduino over serial — pass your machine's serial port via `--port`. All hardware interfaces degrade gracefully in simulation mode; the test suite runs fully offline.
+
 ### 1. Install Dependencies
 ```bash
 pip install -r requirements.txt
@@ -91,9 +93,11 @@ pip install -r requirements.txt
 
 ### 2. Run Gesture Recognition System
 ```bash
-python src/robotic_manipulator/hand_controller.py --port /dev/cu.usbserial-0001
+# Replace the --port value with YOUR system's serial port
+python src/robotic_manipulator/hand_controller.py --port /dev/ttyUSB0
 ```
 - Requires a webcam and Arduino with flex sensor PCB
+- The `--port` flag accepts any serial device (Linux: `/dev/ttyUSB0`, Mac: `/dev/cu.usbserial-*`, Windows: `COM3`)
 - Performs dual-redundant gesture validation (visual + physical)
 
 ### 3. Run Autonomous Perception Pipeline
